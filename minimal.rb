@@ -84,9 +84,9 @@ content = <<~RUBY
   def system!(*args)
     log "Executing \#{args}"
     if system(*args)
-      log "#{args} succeeded"
+      log "\#{args} succeeded"
     else
-      log "#{args} failed"
+      log "\#{args} failed"
       abort
     end
   end
