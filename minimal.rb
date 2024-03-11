@@ -10,12 +10,12 @@ RUBY
 
 test_gems = <<~RUBY
   \n gem 'rspec-rails'
-     gem 'factory_bot_rails'
-     gem 'faker'
-     gem 'selenium-webdriver'
-     gem 'webdrivers'
-     gem 'axe-core-capybara'
-     gem 'axe-core-rspec'
+  \n gem 'factory_bot_rails'
+  \n gem 'faker'
+  \n gem 'selenium-webdriver'
+  \n gem 'webdrivers'
+  \n gem 'axe-core-capybara'
+  \n gem 'axe-core-rspec'
 RUBY
 
 development_gems = <<~RUBY
