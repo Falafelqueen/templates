@@ -99,7 +99,6 @@ inject_into_file 'bin/setup' do
       log ""
       log " bin/setup help  ## show help commands"
       log ""
-
     end
 
 
