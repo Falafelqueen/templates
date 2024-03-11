@@ -9,21 +9,21 @@ general_gems = <<~RUBY
 RUBY
 
 test_gems = <<~RUBY
-\n
-  gem 'rspec-rails'
-  gem 'factory_bot_rails'
-  gem 'faker'
-  gem 'selenium-webdriver'
-  gem 'webdrivers'
-  gem 'axe-core-capybara'
-  gem 'axe-core-rspec'
+  \n #setting up rspec
+    gem 'rspec-rails'
+    gem 'factory_bot_rails'
+    gem 'faker'
+    gem 'selenium-webdriver'
+    gem 'webdrivers'
+    gem 'axe-core-capybara'
+    gem 'axe-core-rspec'
 RUBY
 
 development_gems = <<~RUBY
-\n# Store secret keys in .env file
-  gem 'dotenv-rails'
-\n # Check performance of queries [https://github.com/kirillshevch/query_track]
-  gem 'query_track'
+    \n# Store secret keys in .env file
+    gem 'dotenv-rails'
+    \n # Check performance of queries [https://github.com/kirillshevch/query_track]
+    gem 'query_track'
 RUBY
 
 inject_into_file 'Gemfile', before: 'group :development, :test do' do
