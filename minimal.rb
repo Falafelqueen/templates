@@ -8,21 +8,7 @@ general_gems = <<~RUBY
   gem 'sassc-rails'
 RUBY
 
-inject_into_file 'Gemfile', before: 'group :development, :test do' do
-  general_gems
-end
-
-# Development and Test gems
-gem_group :development, :test do
-  # Store secret keys in .env file
-  gem 'dotenv-rails'
-  # Check performance of queries [https://github.com/kirillshevch/query_track]
-  gem 'query_track'
-end
-
-
-# Setting up rspec
-gem_group :test do
+test_gems = <<~RUBY
   gem 'rspec-rails'
   gem 'factory_bot_rails'
   gem 'faker'
@@ -30,6 +16,27 @@ gem_group :test do
   gem 'webdrivers'
   gem 'axe-core-capybara'
   gem 'axe-core-rspec'
+RUBY
+
+development_gems = <<~RUBY
+  # Store secret keys in .env file
+  gem 'dotenv-rails'
+  # Check performance of queries [https://github.com/kirillshevch/query_track]
+  gem 'query_track'
+RUBY
+
+inject_into_file 'Gemfile', before: 'group :development, :test do' do
+  general_gems
+end
+
+# Development and Test gems
+inject_into_file 'Gemfile', after: 'group :development, :test do' do
+  development_gems
+end
+
+# Test gems
+inject_into_file 'Gemfile', after: 'group :test do' do
+  test_gems
 end
 
 # After bundle
