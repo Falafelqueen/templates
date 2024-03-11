@@ -103,6 +103,14 @@ setup_script_content = <<~RUBY
   def log(message)
     puts "[bin/setup] \#{message}"
   end
+
+  # end of helpers
+
+  if ARGV[0] == "help"
+    help
+  else
+    setup
+  end
 RUBY
 
 # bin/setup
