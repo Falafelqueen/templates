@@ -82,7 +82,7 @@ content = <<~RUBY
     log ""
   end
   def system!(*args)
-    log "Executing #{args}"
+    log "Executing \#{args}"
     if system(*args)
       log "#{args} succeeded"
     else
@@ -91,7 +91,7 @@ content = <<~RUBY
     end
   end
   def log(message)
-    puts "[bin/setup] #{message}"
+    puts "[bin/setup] \#{message}"
   end
 RUBY
 
