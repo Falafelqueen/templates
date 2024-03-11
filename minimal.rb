@@ -40,20 +40,7 @@ inject_into_file 'Gemfile', after: 'group :test do' do
   test_gems
 end
 
-# After bundle
-after_bundle do
-  # remove test folder
-  run('rm -rf test')
-  # install rspec
-  generate('rspec:install')
-end
-
-# bin/setup
-## Write into setup file
-run('rm bin/setup')
-run('touch bin/setup')
-
-content = <<-RUBY
+content = <<~RUBY
   #!/usr/bin/env ruby
   def setup
     log "Installing gems"
@@ -108,4 +95,15 @@ content = <<-RUBY
   end
 RUBY
 
-append_file 'bin/setup', content
+# After bundle
+after_bundle do
+  # remove test folder
+  run('rm -rf test')
+  # install rspec
+  generate('rspec:install')
+  # bin/setup
+  ## Write into setup file
+  run('rm bin/setup')
+  run('touch bin/setup')
+  append_file 'bin/setup', content
+end
