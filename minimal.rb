@@ -105,12 +105,6 @@ setup_script_content = <<~RUBY
   end
 RUBY
 
-# Overwrite (or create) the bin/setup file with the new content
-File.write('bin/setup', setup_script_content)
-
-# Ensure the bin/setup file is executable
-File.chmod(0755, 'bin/setup')
-
 # bin/setup
 ## Write into setup file
 run('rm bin/setup')
