@@ -51,7 +51,7 @@ end
 # bin/setup
 ## Write into setup file
 run('rm bin/setup')
-# run('touch bin/setup')
+run('touch bin/setup')
 
 content = <<-RUBY
   #!/usr/bin/env ruby
@@ -108,4 +108,4 @@ content = <<-RUBY
   end
 RUBY
 
-file 'bin/setup', content
+append_file 'bin/setup', content
