@@ -40,28 +40,35 @@ inject_into_file 'Gemfile', after: 'group :test do' do
   test_gems
 end
 
-content = <<~RUBY
+# Define the content for bin/setup
+# Define the content to be written to bin/setup
+setup_script_content = <<~RUBY
   #!/usr/bin/env ruby
+
   def setup
     log "Installing gems"
     # Only do bundle install if the much-faster
-    # bundle check indicate we need to
+    # bundle check indicates we need to
     system! "bundle check || bundle install"
+
     log "Installing Node modules"
     # Only do yarn install if the much-faster
     # yarn check indicates we need to. Note that
     # --check-files is needed to force Yarn to actually
-    # examine wha'ts in the node_modules
+    # examine what's in the node_modules
     system! "bin/yarn check --check-files || bin/yarn install"
+
     log "Dropping & creating the development database"
     # Note that the very first time this runs, db:reset
     # will fail, but this failure is fixed by
     # doing rails db:migrate
     system! "bin/rails db:reset || bin/rails db:migrate"
+
     log "Dropping & creating the test database"
-    # Setting the RAILS_ENV explicitely to be sure
+    # Setting the RAILS_ENV explicitly to be sure
     # we actually reset the test database
     system!({"RAILS_ENV" => "test"}, "bin/rails db:reset")
+
     log "All set up."
     log ""
     log "To see commonly-needed commands, run:"
@@ -69,6 +76,7 @@ content = <<~RUBY
     log "   bin/setup help"
     log ""
   end
+
   def help
     log "Useful commands"
     log ""
@@ -81,6 +89,7 @@ content = <<~RUBY
     log " bin/setup help  ## show help commands"
     log ""
   end
+
   def system!(*args)
     log "Executing \#{args}"
     if system(*args)
@@ -90,10 +99,26 @@ content = <<~RUBY
       abort
     end
   end
+
   def log(message)
     puts "[bin/setup] \#{message}"
   end
 RUBY
+
+# Overwrite (or create) the bin/setup file with the new content
+File.write('bin/setup', setup_script_content)
+
+# Ensure the bin/setup file is executable
+File.chmod(0755, 'bin/setup')
+
+# bin/setup
+## Write into setup file
+run('rm bin/setup')
+# Use create_file to overwrite bin/setup with the new content
+create_file 'bin/setup', setup_script_content, force: true
+
+# Make sure bin/setup is executable
+run 'chmod +x bin/setup'
 
 # After bundle
 after_bundle do
@@ -101,9 +126,4 @@ after_bundle do
   run('rm -rf test')
   # install rspec
   generate('rspec:install')
-  # bin/setup
-  ## Write into setup file
-  run('rm bin/setup')
-  run('touch bin/setup')
-  append_file 'bin/setup', content
 end
