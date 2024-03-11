@@ -52,7 +52,8 @@ end
 ## Write into setup file
 run('rm bin/setup')
 # run('touch bin/setup')
-file 'bin/setup', <<-CODE
+
+content = <<-RUBY
   #!/usr/bin/env ruby
   def setup
     log "Installing gems"
@@ -105,4 +106,6 @@ file 'bin/setup', <<-CODE
   def log(message)
     puts "[bin/setup] #{message}"
   end
-CODE
+RUBY
+
+file 'bin/setup', content
