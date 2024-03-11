@@ -29,17 +29,17 @@ development_gems = <<~RUBY
   gem 'query_track'
 RUBY
 
-inject_into_file 'Gemfile', before: 'group :development, :test do' do
+inject_into_file 'Gemfile', before: 'group :development, :test do\n' do
   general_gems
 end
 
 # Development and Test gems
-inject_into_file 'Gemfile', after: 'group :development, :test do' do
+inject_into_file 'Gemfile', after: 'group :development, :test do\n' do
   development_gems
 end
 
 # Test gems
-inject_into_file 'Gemfile', after: 'group :test do' do
+inject_into_file 'Gemfile', after: 'group :test do\n' do
   test_gems
 end
 
