@@ -3,15 +3,13 @@ run "if uname | grep -q 'Darwin'; then pgrep spring | xargs kill -9; fi"
 # Gemfile
 # All env gems
 general_gems = <<~RUBY
-  \n
   gem 'autoprefixer-rails'
   gem 'simple_form', github: 'heartcombo/simple_form'
   gem 'sassc-rails'
 RUBY
 
 test_gems = <<~RUBY
-  \n
-  gem 'rspec-rails'
+  \n gem 'rspec-rails'
   gem 'factory_bot_rails'
   gem 'faker'
   gem 'selenium-webdriver'
@@ -21,11 +19,9 @@ test_gems = <<~RUBY
 RUBY
 
 development_gems = <<~RUBY
-  \n
-  # Store secret keys in .env file
+  \n # Store secret keys in .env file
   gem 'dotenv-rails'
-  \n
-  # Check performance of queries [https://github.com/kirillshevch/query_track]
+  \n # Check performance of queries [https://github.com/kirillshevch/query_track]
   gem 'query_track'
 RUBY
 
