@@ -51,69 +51,58 @@ end
 # bin/setup
 ## Write into setup file
 run('rm bin/setup')
-run('touch bin/setup')
-inject_into_file 'bin/setup' do
-  <<~RUBY
-    #!/usr/bin/env ruby
-
-    def setup
-      log "Installing gems"
-      # Only do bundle install if the much-faster
-      # bundle check indicate we need to
-      system! "bundle check || bundle install"
-
-      log "Installing Node modules"
-      # Only do yarn install if the much-faster
-      # yarn check indicates we need to. Note that
-      # --check-files is needed to force Yarn to actually
-      # examine wha'ts in the node_modules
-      system! "bin/yarn check --check-files || bin/yarn install"
-
-      log "Dropping & creating the development database"
-      # Note that the very first time this runs, db:reset
-      # will fail, but this failure is fixed by
-      # doing rails db:migrate
-      system! "bin/rails db:reset || bin/rails db:migrate"
-
-      log "Dropping & creating the test database"
-      # Setting the RAILS_ENV explicitely to be sure
-      # we actually reset the test database
-      system!({"RAILS_ENV" => "test"}, "bin/rails db:reset")
-
-      log "All set up."
-      log ""
-      log "To see commonly-needed commands, run:"
-      log ""
-      log "   bin/setup help"
-      log ""
+# run('touch bin/setup')
+file 'bin/setup', <<~RUBY
+  #!/usr/bin/env ruby
+  def setup
+    log "Installing gems"
+    # Only do bundle install if the much-faster
+    # bundle check indicate we need to
+    system! "bundle check || bundle install"
+    log "Installing Node modules"
+    # Only do yarn install if the much-faster
+    # yarn check indicates we need to. Note that
+    # --check-files is needed to force Yarn to actually
+    # examine wha'ts in the node_modules
+    system! "bin/yarn check --check-files || bin/yarn install"
+    log "Dropping & creating the development database"
+    # Note that the very first time this runs, db:reset
+    # will fail, but this failure is fixed by
+    # doing rails db:migrate
+    system! "bin/rails db:reset || bin/rails db:migrate"
+    log "Dropping & creating the test database"
+    # Setting the RAILS_ENV explicitely to be sure
+    # we actually reset the test database
+    system!({"RAILS_ENV" => "test"}, "bin/rails db:reset")
+    log "All set up."
+    log ""
+    log "To see commonly-needed commands, run:"
+    log ""
+    log "   bin/setup help"
+    log ""
+  end
+  def help
+    log "Useful commands"
+    log ""
+    log " bin/run         ## run app locally"
+    log ""
+    log " bin/ci          ## run all test and checks CI would"
+    log ""
+    log " spec            ## run all tests"
+    log ""
+    log " bin/setup help  ## show help commands"
+    log ""
+  end
+  def system!(*args)
+    log "Executing #{args}"
+    if system(*args)
+      log "#{args} succeeded"
+    else
+      log "#{args} failed"
+      abort
     end
-
-    def help
-      log "Useful commands"
-      log ""
-      log " bin/run         ## run app locally"
-      log ""
-      log " bin/ci          ## run all test and checks CI would"
-      log ""
-      log " spec            ## run all tests"
-      log ""
-      log " bin/setup help  ## show help commands"
-      log ""
-    end
-
-
-    def system!(*args)
-      log "Executing #{args}"
-      if system(*args)
-        log "#{args} succeeded"
-      else
-        log "#{args} failed"
-        abort
-      end
-    end
-
-    def log(message)
-      puts "[bin/setup] #{message}"
-    end
-  RUBY
-end
+  end
+  def log(message)
+    puts "[bin/setup] #{message}"
+  end
+RUBY
