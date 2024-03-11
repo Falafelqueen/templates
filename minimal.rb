@@ -13,27 +13,23 @@ inject_into_file 'Gemfile', before: 'group :development, :test do' do
 end
 
 # Development and Test gems
-inject_into_file 'Gemfile', after: 'group :development, :test do' do
-  <<~RUBY
-    # Store secret keys in .env file
-    gem 'dotenv-rails'
-    # Check performance of queries [https://github.com/kirillshevch/query_track]
-    gem 'query_track'
-  RUBY
+gem_group :development, :test do
+  # Store secret keys in .env file
+  gem 'dotenv-rails'
+  # Check performance of queries [https://github.com/kirillshevch/query_track]
+  gem 'query_track'
 end
 
-# Setting up rspec
-inject_into_file 'Gemfile', after: 'group :test do' do
-  <<~RUBY
 
-    gem 'rspec-rails'
-    gem 'factory_bot_rails'
-    gem 'faker'
-    gem "selenium-webdriver"
-    gem "webdrivers"
-    gem "axe-core-capybara"
-    gem "axe-core-rspec"
-  RUBY
+# Setting up rspec
+gem_group :test do
+  gem 'rspec-rails'
+  gem 'factory_bot_rails'
+  gem 'faker'
+  gem 'selenium-webdriver'
+  gem 'webdrivers'
+  gem 'axe-core-capybara'
+  gem 'axe-core-rspec'
 end
 
 # After bundle
