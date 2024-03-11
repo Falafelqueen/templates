@@ -25,6 +25,7 @@ end
 # Setting up rspec
 inject_into_file 'Gemfile', after: 'group :test do' do
   <<~RUBY
+
     gem 'rspec-rails'
     gem 'factory_bot_rails'
     gem 'faker'
@@ -35,8 +36,7 @@ inject_into_file 'Gemfile', after: 'group :test do' do
   RUBY
 end
 
-## After bundle
-
+# After bundle
 after_bundle do
   generate('rspec:install')
 end
