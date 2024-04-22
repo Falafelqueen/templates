@@ -10,20 +10,22 @@ general_gems = <<~RUBY
 RUBY
 
 test_gems = <<~RUBY
-  \n  # Setting up rspec
-    gem 'rspec-rails'
-    gem 'factory_bot_rails'
-    gem 'faker'
-    gem 'webdrivers'
-    gem 'axe-core-capybara'
-    gem 'axe-core-rspec'
+  \n  # Rspec is set up for both test and development
+      # To launch the html in browser and see the test (debugging purposes)
+      gem "launchy"
 RUBY
 
-development_gems = <<~RUBY
+development_and_test_gems = <<~RUBY
   \n  # Store secret keys in .env file
+    gem 'rspec-rails'
     gem 'dotenv-rails'
     \n  # Check performance of queries [https://github.com/kirillshevch/query_track]
     gem 'query_track'
+    gem 'factory_bot_rails'
+    gem 'faker'
+    gem 'webdrivers'
+    \n  # One-liners to test common Rails functionality [https://github.com/thoughtbot/shoulda-matchers/tree/main]
+    gem 'shoulda-matchers', '~> 6.0'
 RUBY
 
 inject_into_file 'Gemfile', before: 'group :development, :test do' do
@@ -32,7 +34,7 @@ end
 
 # Development and Test gems
 inject_into_file 'Gemfile', after: 'group :development, :test do' do
-  development_gems
+  development_and_test_gems
 end
 
 # Test gems
@@ -56,7 +58,7 @@ setup_script_content = <<~RUBY
     # yarn check indicates we need to. Note that
     # --check-files is needed to force Yarn to actually
     # examine what's in the node_modules
-    system! "bin/yarn check --check-files || bin/yarn install"
+    system! "bin/yarn check --check-files || yarn install"
 
     log "Dropping & creating the development database"
     # Note that the very first time this runs, db:reset
@@ -128,4 +130,44 @@ after_bundle do
   run('rm -rf test')
   # install rspec
   generate('rspec:install')
+
+  # add tailwind
+  rails_command 'css:install:tailwind'
+
+  # add active storage
+  rails_command 'active_storage:install'
+
+  ## add simple form
+
+  generate('simple_form:install')
+
+  # create home page
+  generate(:controller, 'pages', 'home', '--skip-routes', '--no-test-framework')
+  route 'root to: "pages#home"'
+
+  # create .env file to store secret keys
+  # Dotenv
+  run "touch '.env'"
+
+  # Add .env to .gitignore
+  append_to_file '.gitignore', '.env'
+
+  # Initialize git
+  git :init
+  git add: '.'
+  git commit: "-m 'Initial commit from template'"
 end
+
+# Do not generate extra files
+initializer 'generators.rb', <<-CODE
+  Rails.application.config.generators do |g|
+  g.test_framework :rspec,
+  fixtures: false,
+  fixture_replacement :factory_bot, dir: "spec/factories",
+  view_specs: false,
+  helper_specs: false,
+  routing_specs: false,
+  request_specs: false,
+  controller_specs: false
+  end
+CODE
