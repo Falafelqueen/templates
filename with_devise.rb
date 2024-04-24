@@ -186,7 +186,7 @@ def set_up_tests
   # Remove test folder
   run 'rm -rf test'
   # Install rspec
-  generate 'rspec:install'
+  rails_command 'generate rspec:install'
 end
 
 def set_up_tailwind
@@ -199,7 +199,7 @@ end
 
 def set_up_simple_form
   # Add simple form
-  generate 'simple_form:install'
+  rails_command 'generate simple_form:install'
   ## Replace simple form config file
   run 'rm -rf config/initializers/simple_form.rb'
   run 'curl -L https://raw.githubusercontent.com/Falafelqueen/templated/main/config/initializers/simple_form.rb > config/initializers/simple_form.rb'
@@ -213,7 +213,7 @@ def set_up_simple_form
   run 'yarn add stimulus-numeric-controls'
 end
 
-def replace_devise_view_content
+def devise_replace_view_content
   link_to = <<~HTML
     <p>Unhappy? <%= link_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?" }, method: :delete %></p>
   HTML
@@ -226,22 +226,29 @@ def replace_devise_view_content
   gsub_file('app/views/devise/registrations/edit.html.erb', link_to, button_to)
 end
 
-def set_up_devise
-  # Set up devise with User model
-  generate 'devise:install'
-  generate 'devise', 'User'
+def devise_uncomment_navigational_formats
+  gsub_file('config/initializers/devise.rb', "# config.navigational_formats = ['*/*', :html, :turbo_stream]", " config.navigational_formats = ['*/*', :html, :turbo_stream]")
+end
 
-  ## Create flash partial for notice and alert
+def add_flash_partial
+  # Create flash partial for notice and alert
   file 'app/views/shared/_flashes_general.html.erb', flashes
-  ## Add flash messages to application.html.erb
+  # Add flash messages to application.html.erb
   inject_into_file 'app/views/layouts/application.html.erb', after: "<body>\n" do
     <<-HTML
       <%= render 'shared/flashes_general' %>
     HTML
   end
+end
 
-  generate 'devise:views'
-  replace_devise_view_content
+def set_up_devise
+  # Set up devise with User model
+  rails_command 'generate devise:install'
+  rails_command 'generate devise User'
+  add_flash_partial
+  rails_command 'generate devise:views'
+  devise_replace_view_content
+  devise_uncomment_navigational_formats
 end
 
 # After bundle
@@ -254,7 +261,7 @@ after_bundle do
   rails_command 'active_storage:install'
 
   # Create home page
-  generate :controller, 'pages', 'home', '--skip-routes', '--no-test-framework'
+  rails_command 'generate controller Pages home --skip-routes --no-test-framework'
   route 'root to: "pages#home"'
 
   set_up_devise
