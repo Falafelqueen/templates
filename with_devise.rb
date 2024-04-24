@@ -6,6 +6,8 @@ general_gems = <<~RUBY
   gem 'autoprefixer-rails'
   gem 'simple_form', github: 'heartcombo/simple_form'
   gem 'tailwindcss-rails'
+  \n # Use devise for authentication
+  gem 'devise'
   \n
 RUBY
 
@@ -125,50 +127,139 @@ create_file 'bin/setup', setup_script_content, force: true
 # Make sure bin/setup is executable
 run 'chmod +x bin/setup'
 
-# After bundle
-after_bundle do
-  # remove test folder
+def flashes
+  <<~HTML
+    <% if notice %>
+      <div class="bg-yellow-50 border border-yellow-200 text-sm text-yellow-800 rounded-lg p-4 dark:bg-yellow-800/10 dark:border-yellow-900 dark:text-yellow-500" role="alert">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="flex-shrink-0 size-4 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+              <path d="M12 9v4"></path>
+              <path d="M12 17h.01"></path>
+            </svg>
+          </div>
+          <div class="ms-4">
+            <h3 class="text-sm font-semibold">
+              <%= notice %>
+            </h3>
+            <% if flash[:info] %>
+              <div class="mt-1 text-sm text-yellow-700">
+                <%= flash[:info] %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <% if alert %>
+      <div class="bg-red-50 border border-red-200 text-sm text-red-800 rounded-lg p-4 dark:bg-red-800/10 dark:border-red-900 dark:text-red-500" role="alert">
+        <div class="flex">
+          <div class="flex-shrink-0">
+          <!-- icon start -->
+            <span class="inline-flex justify-center items-center size-8 rounded-full border-4 border-red-100 bg-red-200 text-red-800 dark:border-red-900 dark:bg-red-800 dark:text-red-400">
+              <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 6 6 18"></path>
+                <path d="m6 6 12 12"></path>
+              </svg>
+            </span>
+          <!-- icon end -->
+          </div>
+          <div class="ms-4">
+            <h3 class="text-sm font-semibold">
+              <%= notice %>
+            </h3>
+            <% if flash[:info] %>
+              <div class="mt-1 text-sm text-red-700 dark:text-red-400">
+                <%= flash[:info] %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  HTML
+end
+
+def set_up_tests
+  # Remove test folder
   run 'rm -rf test'
-  # install rspec
+  # Install rspec
   generate 'rspec:install'
+end
 
-  # add tailwind
+def set_up_tailwind
+  # Add tailwind
   rails_command 'tailwindcss:install'
-
-  # replace tailwind config file
+  ## Replace tailwind config file
   run 'rm -rf config/tailwind.config.js'
-
   run 'curl -L https://raw.githubusercontent.com/Falafelqueen/templated/main/config/tailwind.config.js > config/tailwind.config.js'
+end
 
-  # add active storage
-  rails_command 'active_storage:install'
-
-  ## add simple form
-
+def set_up_simple_form
+  # Add simple form
   generate 'simple_form:install'
-
-  # replace simple form config file
-
+  ## Replace simple form config file
   run 'rm -rf config/initializers/simple_form.rb'
-
   run 'curl -L https://raw.githubusercontent.com/Falafelqueen/templated/main/config/initializers/simple_form.rb > config/initializers/simple_form.rb'
-
-  # add custom simple form wrapper
-
+  ## Add custom simple form wrapper
   run 'mkdir lib/simple_form'
   run 'curl -L https://raw.githubusercontent.com/Falafelqueen/templated/main/lib/simple_form/extensions.rb > lib/simple_form/extensions.rb'
-
-  # replace to application_helper.rb to have tailwind_simple_form_for helper
-
+  ## Replace to application_helper.rb to have tailwind_simple_form_for helper
   run 'rm -rf app/helpers/application_helper.rb'
   run 'curl -L https://raw.githubusercontent.com/Falafelqueen/templated/main/app/helpers/application_helper.rb > app/helpers/application_helper.rb'
-
+  ## Add increase/descrease functionality to numeric controls
   run 'yarn add stimulus-numeric-controls'
-  # create home page
-  generate(:controller, 'pages', 'home', '--skip-routes', '--no-test-framework')
+end
+
+def replace_devise_view_content
+  link_to = <<~HTML
+    <p>Unhappy? <%= link_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?" }, method: :delete %></p>
+  HTML
+  button_to = <<~HTML
+    <div class="flex align-items-center">
+      <div>Unhappy?</div>
+      <%= button_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?" }, method: :delete, class: "py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" %>
+    </div>
+  HTML
+  gsub_file('app/views/devise/registrations/edit.html.erb', link_to, button_to)
+end
+
+def set_up_devise
+  # Set up devise with User model
+  generate 'devise', 'User'
+  generate 'devise:install'
+
+  ## Create flash partial for notice and alert
+  file 'app/views/shared/_flashes_general.html.erb', flashes
+  ## Add flash messages to application.html.erb
+  inject_into_file 'app/views/layouts/application.html.erb', after: "<body>\n" do
+    <<-HTML
+      <%= render 'shared/flashes_general' %>
+    HTML
+  end
+
+  generate 'devise:views'
+  replace_devise_view_content
+end
+
+# After bundle
+after_bundle do
+  set_up_tests
+  set_up_tailwind
+  set_up_simple_form
+
+  # Add active storage
+  rails_command 'active_storage:install'
+
+  # Create home page
+  generate :controller, 'pages', 'home', '--skip-routes', '--no-test-framework'
   route 'root to: "pages#home"'
 
-  # create .env file to store secret keys
+  set_up_devise
+
+  # Create .env file to store secret keys
   # Dotenv
   run "touch '.env'"
 
