@@ -228,8 +228,8 @@ end
 
 def set_up_devise
   # Set up devise with User model
-  generate 'devise', 'User'
   generate 'devise:install'
+  generate 'devise', 'User'
 
   ## Create flash partial for notice and alert
   file 'app/views/shared/_flashes_general.html.erb', flashes
