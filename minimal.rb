@@ -5,7 +5,7 @@ run "if uname | grep -q 'Darwin'; then pgrep spring | xargs kill -9; fi"
 general_gems = <<~RUBY
   gem 'autoprefixer-rails'
   gem 'simple_form', github: 'heartcombo/simple_form'
-  gem 'sassc-rails'
+  gem 'tailwindcss-rails'
   \n
 RUBY
 
@@ -117,7 +117,8 @@ RUBY
 
 # bin/setup
 ## Write into setup file
-run('rm bin/setup')
+run 'rm bin/setup'
+
 # Use create_file to overwrite bin/setup with the new content
 create_file 'bin/setup', setup_script_content, force: true
 
@@ -127,19 +128,40 @@ run 'chmod +x bin/setup'
 # After bundle
 after_bundle do
   # remove test folder
-  run('rm -rf test')
+  run 'rm -rf test'
   # install rspec
-  generate('rspec:install')
+  generate 'rspec:install'
 
   # add tailwind
-  rails_command 'css:install:tailwind'
+  rails_command 'tailwindcss:install'
+
+  # replace tailwind config file
+  run 'rm -rf config/tailwind.config.js'
+
+  run 'curl -L https://raw.githubusercontent.com/Falafelqueen/templated/main/config/tailwind.config.js > config/tailwind.config.js'
 
   # add active storage
   rails_command 'active_storage:install'
 
   ## add simple form
 
-  generate('simple_form:install')
+  generate 'simple_form:install'
+
+  # replace simple form config file
+
+  run 'rm -rf config/initializers/simple_form.rb'
+
+  run 'curl -L https://raw.githubusercontent.com/Falafelqueen/templated/main/config/initializers/simple_form.rb > config/initializers/simple_form.rb'
+
+  # add custom simple form wrapper
+
+  run 'mkdir lib/simple_form'
+  run 'curl -L https://raw.githubusercontent.com/Falafelqueen/templated/main/lib/simple_form/extensions.rb > lib/simple_form/extensions.rb'
+
+  # replace to application_helper.rb to have tailwind_simple_form_for helper
+
+  run 'rm -rf app/helpers/application_helper.rb'
+  run 'curl -L https://raw.githubusercontent.com/Falafelqueen/templated/main/app/helpers/application_helper.rb > app/helpers/application_helper.rb'
 
   # create home page
   generate(:controller, 'pages', 'home', '--skip-routes', '--no-test-framework')
