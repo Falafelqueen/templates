@@ -200,12 +200,12 @@ end
 def set_up_simple_form
   # Add simple form
   rails_command 'generate simple_form:install'
-  ## Replace simple form config file
-  run 'rm -rf config/initializers/simple_form.rb'
-  run 'curl -L https://raw.githubusercontent.com/Falafelqueen/templated/main/config/initializers/simple_form.rb > config/initializers/simple_form.rb'
   ## Add custom simple form wrapper
   run 'mkdir lib/simple_form'
   run 'curl -L https://raw.githubusercontent.com/Falafelqueen/templated/main/lib/simple_form/extensions.rb > lib/simple_form/extensions.rb'
+  ## Replace simple form config file
+  run 'rm -rf config/initializers/simple_form.rb'
+  run 'curl -L https://raw.githubusercontent.com/Falafelqueen/templated/main/config/initializers/simple_form.rb > config/initializers/simple_form.rb'
   ## Replace to application_helper.rb to have tailwind_simple_form_for helper
   run 'rm -rf app/helpers/application_helper.rb'
   run 'curl -L https://raw.githubusercontent.com/Falafelqueen/templated/main/app/helpers/application_helper.rb > app/helpers/application_helper.rb'
