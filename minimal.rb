@@ -133,107 +133,75 @@ after_bundle do
 
   # Define the content for bin/setup
 # Define the content to be written to bin/setup
-setup_script_content = <<~RUBY
+  setup_script_content = <<~RUBY
   #!/usr/bin/env ruby
 
-  def setup
-    log "Installing gems"
-    # Only do bundle install if the much-faster
-    # bundle check indicates we need to
-    system! "bundle check || bundle install"
+    def setup
+      log "Installing gems"
+      # Only do bundle install if the much-faster
+      # bundle check indicates we need to
+      system! "bundle check || bundle install"
 
-    log "Installing Node modules"
-    # Only do yarn install if the much-faster
-    # yarn check indicates we need to. Note that
-    # --check-files is needed to force Yarn to actually
-    # examine what's in the node_modules
-    system! "bin/yarn check --check-files || yarn install"
+      log "Installing Node modules"
+      # Only do yarn install if the much-faster
+      # yarn check indicates we need to. Note that
+      # --check-files is needed to force Yarn to actually
+      # examine what's in the node_modules
+      system! "bin/yarn check --check-files || yarn install"
 
-    log "Dropping & creating the development database"
-    # Note that the very first time this runs, db:reset
-    # will fail, but this failure is fixed by
-    # doing rails db:migrate
-    system! "bin/rails db:reset || bin/rails db:migrate"
+      log "Dropping & creating the development database"
+      # Note that the very first time this runs, db:reset
+      # will fail, but this failure is fixed by
+      # doing rails db:migrate
+      system! "bin/rails db:reset || bin/rails db:migrate"
 
-    log "Dropping & creating the test database"
-    # Setting the RAILS_ENV explicitly to be sure
-    # we actually reset the test database
-    system!({"RAILS_ENV" => "test"}, "bin/rails db:reset")
+      log "Dropping & creating the test database"
+      # Setting the RAILS_ENV explicitly to be sure
+      # we actually reset the test database
+      system!({"RAILS_ENV" => "test"}, "bin/rails db:reset")
 
-    log "All set up."
-    log ""
-    log "To see commonly-needed commands, run:"
-    log ""
-    log "   bin/setup help"
-    log ""
-  end
-
-  def help
-    log "Useful commands"
-    log ""
-    log " bin/run         ## run app locally"
-    log ""
-    log " bin/ci          ## run all test and checks CI would"
-    log ""
-    log " spec            ## run all tests"
-    log ""
-    log " bin/setup help  ## show help commands"
-    log ""
-  end
-
-  def system!(*args)
-    log "Executing \#{args}"
-    if system(*args)
-      log "\#{args} succeeded"
-    else
-      log "\#{args} failed"
-      abort
+      log "All set up."
+      log ""
+      log "To see commonly-needed commands, run:"
+      log ""
+      log "   bin/setup help"
+      log ""
     end
-  end
 
-  def log(message)
-    puts "[bin/setup] \#{message}"
-  end
-
-  # end of helpers
-  if ARGV[0] == "help"
-    help
-  else
-    setup
-  end
-
-  def check_and_install_node_version(required_version)
-    log "Checking Node.js version"
-    current_version = `node -v`.strip.match(/^v(\d+)/)[1]
-    if current_version.to_i < required_version.to_i
-      log "Node.js version #{current_version} detected. Installing Node.js version #{required_version}."
-      install_node_version(required_version)
-    else
-      log "Node.js version detected. No need to install Node.js"
+    def help
+      log "Useful commands"
+      log ""
+      log " bin/run         ## run app locally"
+      log ""
+      log " bin/ci          ## run all test and checks CI would"
+      log ""
+      log " spec            ## run all tests"
+      log ""
+      log " bin/setup help  ## show help commands"
+      log ""
     end
-  end
 
-  def install_node_version(version)
-    log "Installing Node.js version #{version}"
-    system!("nvm install #{version}")
-    system!("nvm use #{version}")
-    system!("nvm alias default #{version}")
-    log "Checking if esbuild is installed"
-    esbuild_installed = system("yarn list esbuild")
-    if esbuild_installed
-      log "esbuild is already installed."
-    else
-      log "esbuild is not installed. Installing esbuild..."
-    # Install esbuild using yarn or npm
-      system!("yarn add esbuild")
+    def system!(*args)
+      log "Executing \#{args}"
+      if system(*args)
+        log "\#{args} succeeded"
+      else
+        log "\#{args} failed"
+        abort
+      end
     end
-  end
 
-  # Check for the required Node.js version
-  required_node_version = 18
-  check_and_install_node_version(required_node_version)
-RUBY
+    def log(message)
+      puts "[bin/setup] \#{message}"
+    end
 
+    # end of helpers
+    if ARGV[0] == "help"
+      help
+    else
+      setup
+    end
+  RUBY
 
   # bin/setup
   ## Write into setup file
