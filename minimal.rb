@@ -26,6 +26,16 @@ development_and_test_gems = <<~RUBY
     gem 'webdrivers'
     \n  # One-liners to test common Rails functionality [https://github.com/thoughtbot/shoulda-matchers/tree/main]
     gem 'shoulda-matchers', '~> 6.0'
+      # Rubocop for formating and tidying up code
+    gem 'rubocop', require: false
+    gem 'rubocop-rails', require: false
+    gem 'rubocop-rspec', require: false
+    gem 'rubocop-rails-accessibility', require: false
+    gem 'rubocop-performance', require: false
+    gem 'rubocop-capybara', require: false
+    gem 'rubocop-factory_bot', require: false
+    # Bullet gem to detect N+1 queries
+    gem 'bullet'
 RUBY
 
 inject_into_file 'Gemfile', before: 'group :development, :test do' do
@@ -40,6 +50,27 @@ end
 # Test gems
 inject_into_file 'Gemfile', after: 'group :test do' do
   test_gems
+end
+
+# Add Shouda Matchers to spec_helper.rb
+inject_into_file 'spec/spec_helper.rb', before: "RSpec.configure do |config|\n" do
+  <<~RUBY
+      Shoulda::Matchers.configure do |config|
+      config.integrate do |with|
+        with.test_framework :rspec
+        with.library :rails
+      end
+    end
+  RUBY
+end
+
+# Tests driven by headless_chrome (selenium)
+inject_into_file 'spec/rails_helper.rb', after: "RSpec.configure do |config|\n" do
+  <<~RUBY
+    config.before(:each, type: :system) do
+      driven_by(:selenium_chrome_headless)
+    end
+  RUBY
 end
 
 # Define the content for bin/setup
@@ -180,6 +211,16 @@ after_bundle do
   git add: '.'
   git commit: "-m 'Initial commit from template'"
 end
+
+# Import the numeric controls controller (for simple_form)
+
+inject_into_file 'app/javascript/application.js', before: "// const application = Application.start()" do
+  <<~JS
+    import NumericControls from "stimulus-numeric-controls";
+    Stimulus.register("numeric-controls", NumericControls);
+  JS
+end
+
 
 # Do not generate extra files
 initializer 'generators.rb', <<-CODE

@@ -44,6 +44,18 @@ inject_into_file 'Gemfile', after: 'group :test do' do
   test_gems
 end
 
+# Add Shouda Matchers to spec_helper.rb
+inject_into_file 'spec/spec_helper.rb', before: "RSpec.configure do |config|\n" do
+  <<~RUBY
+      Shoulda::Matchers.configure do |config|
+      config.integrate do |with|
+        with.test_framework :rspec
+        with.library :rails
+      end
+    end
+  RUBY
+end
+
 # Define the content for bin/setup
 # Define the content to be written to bin/setup
 setup_script_content = <<~RUBY
