@@ -52,86 +52,7 @@ inject_into_file 'Gemfile', after: 'group :test do' do
   test_gems
 end
 
-# After bundle
-after_bundle do
-  # remove test folder
-  run 'rm -rf test'
-  # install rspec
-  generate 'rspec:install'
-
-  # add tailwind
-  rails_command 'tailwindcss:install'
-
-  # replace tailwind config file
-  run 'rm -rf config/tailwind.config.js'
-
-  run 'curl -L https://raw.githubusercontent.com/Falafelqueen/templated/main/config/tailwind.config.js > config/tailwind.config.js'
-
-  # add active storage
-  rails_command 'active_storage:install'
-
-  ## add simple form
-
-  generate 'simple_form:install'
-
-  # replace simple form config file
-
-  run 'rm -rf config/initializers/simple_form.rb'
-
-  run 'curl -L https://raw.githubusercontent.com/Falafelqueen/templated/main/config/initializers/simple_form.rb > config/initializers/simple_form.rb'
-
-  # add custom simple form wrapper
-
-  run 'mkdir lib/simple_form'
-  run 'curl -L https://raw.githubusercontent.com/Falafelqueen/templated/main/lib/simple_form/extensions.rb > lib/simple_form/extensions.rb'
-
-  # replace to application_helper.rb to have tailwind_simple_form_for helper
-
-  run 'rm -rf app/helpers/application_helper.rb'
-  run 'curl -L https://raw.githubusercontent.com/Falafelqueen/templated/main/app/helpers/application_helper.rb > app/helpers/application_helper.rb'
-
-  run 'yarn add stimulus-numeric-controls'
-  # create home page
-  generate(:controller, 'pages', 'home', '--skip-routes', '--no-test-framework')
-  route 'root to: "pages#home"'
-
-  # create .env file to store secret keys
-  # Dotenv
-  run "touch '.env'"
-
-  # Add .env to .gitignore
-  append_to_file '.gitignore', '.env'
-
-  # Tests driven by headless_chrome (selenium)
-  inject_into_file 'spec/rails_helper.rb', after: "RSpec.configure do |config|\n" do
-    <<~RUBY
-    config.before(:each, type: :system) do
-      driven_by(:selenium_chrome_headless)
-    end
-    RUBY
-  end
-
-    # Add Shouda Matchers to spec_helper.rb
-    inject_into_file 'spec/spec_helper.rb', before: "RSpec.configure do |config|\n" do
-      <<~RUBY
-          Shoulda::Matchers.configure do |config|
-          config.integrate do |with|
-            with.test_framework :rspec
-            with.library :rails
-          end
-        end
-      RUBY
-    end
-
-  # Import the numeric controls controller (for simple_form)
-  inject_into_file 'app/javascript/application.js', before: "// const application = Application.start()" do
-    <<~JS
-      import NumericControls from "stimulus-numeric-controls";
-      Stimulus.register("numeric-controls", NumericControls);
-    JS
-  end
-
-  # Define the content for bin/setup
+# Define the content for bin/setup
 # Define the content to be written to bin/setup
   setup_script_content = <<~RUBY
   #!/usr/bin/env ruby
@@ -212,6 +133,85 @@ after_bundle do
 
   # Make sure bin/setup is executable
   run 'chmod +x bin/setup'
+
+# After bundle
+after_bundle do
+  # remove test folder
+  run 'rm -rf test'
+  # install rspec
+  generate 'rspec:install'
+
+  # add tailwind
+  rails_command 'tailwindcss:install'
+
+  # replace tailwind config file
+  run 'rm -rf config/tailwind.config.js'
+
+  run 'curl -L https://raw.githubusercontent.com/Falafelqueen/templated/main/config/tailwind.config.js > config/tailwind.config.js'
+
+  # add active storage
+  rails_command 'active_storage:install'
+
+  ## add simple form
+
+  generate 'simple_form:install'
+
+  # replace simple form config file
+
+  run 'rm -rf config/initializers/simple_form.rb'
+
+  run 'curl -L https://raw.githubusercontent.com/Falafelqueen/templated/main/config/initializers/simple_form.rb > config/initializers/simple_form.rb'
+
+  # add custom simple form wrapper
+
+  run 'mkdir lib/simple_form'
+  run 'curl -L https://raw.githubusercontent.com/Falafelqueen/templated/main/lib/simple_form/extensions.rb > lib/simple_form/extensions.rb'
+
+  # replace to application_helper.rb to have tailwind_simple_form_for helper
+
+  run 'rm -rf app/helpers/application_helper.rb'
+  run 'curl -L https://raw.githubusercontent.com/Falafelqueen/templated/main/app/helpers/application_helper.rb > app/helpers/application_helper.rb'
+
+  run 'yarn add stimulus-numeric-controls'
+  # create home page
+  generate(:controller, 'pages', 'home', '--skip-routes', '--no-test-framework')
+  route 'root to: "pages#home"'
+
+  # create .env file to store secret keys
+  # Dotenv
+  run "touch '.env'"
+
+  # Add .env to .gitignore
+  append_to_file '.gitignore', '.env'
+
+  # Tests driven by headless_chrome (selenium)
+  inject_into_file 'spec/rails_helper.rb', after: "RSpec.configure do |config|\n" do
+    <<~RUBY
+    config.before(:each, type: :system) do
+      driven_by(:selenium_chrome_headless)
+    end
+    RUBY
+  end
+
+    # Add Shouda Matchers to spec_helper.rb
+    inject_into_file 'spec/spec_helper.rb', before: "RSpec.configure do |config|\n" do
+      <<~RUBY
+          Shoulda::Matchers.configure do |config|
+          config.integrate do |with|
+            with.test_framework :rspec
+            with.library :rails
+          end
+        end
+      RUBY
+    end
+
+  # Import the numeric controls controller (for simple_form)
+  inject_into_file 'app/javascript/application.js', before: "// const application = Application.start()" do
+    <<~JS
+      import NumericControls from "stimulus-numeric-controls";
+      Stimulus.register("numeric-controls", NumericControls);
+    JS
+  end
 
   # Initialize git
   git :init
